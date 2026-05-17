@@ -9,8 +9,9 @@ RUN mkdir -p /var/www/html/api /var/run/php /var/lib/nginx/tmp
 COPY api/sync.php /var/www/html/api/sync.php
 COPY api/.htaccess /var/www/html/api/.htaccess
 
-# تنظیم مستقیم nginx (بدون نیاز به فایل جدا)
-RUN echo 'server {
+# تنظیم nginx با روش صحیح
+RUN cat > /etc/nginx/http.d/default.conf << 'EOF'
+server {
     listen 80 default_server;
     root /var/www/html;
     index index.php;
@@ -25,7 +26,8 @@ RUN echo 'server {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
-}' > /etc/nginx/http.d/default.conf
+}
+EOF
 
 # تنظیم مجوزها
 RUN chown -R www-data:www-data /var/www/html
