@@ -1,19 +1,21 @@
 FROM php:8.3-fpm-alpine
 
+# نصب nginx و curl
 RUN apk add --no-cache nginx curl
 
-# ایجاد پوشه‌ها
-RUN mkdir -p /var/www/html/api /var/run/php /var/lib/nginx/tmp
+# ایجاد پوشه‌های مورد نیاز
+RUN mkdir -p /var/www/html/api /var/run/php /var/lib/nginx/tmp /var/log/nginx
 
-# کپی فایل‌ها
+# کپی فایل‌های پروژه
 COPY api/sync.php /var/www/html/api/sync.php
 COPY api/.htaccess /var/www/html/api/.htaccess
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 # تنظیم مجوزها
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
 EXPOSE 80
 
-# اجرای همزمان php-fpm و nginx
+# اجرای nginx و php-fpm
 CMD sh -c "php-fpm8.3 -D && nginx -g 'daemon off;'"
