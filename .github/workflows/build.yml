@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: yourusername/php-tunnel:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/php-tunnel:latest
