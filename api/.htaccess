@@ -1,0 +1,10 @@
+RewriteEngine On
+
+RewriteCond %{HTTP:Upgrade} websocket [NC]
+RewriteCond %{HTTP:Connection} upgrade [NC]
+RewriteRule ^sync\.php$ "ws://91.107.251.152:443/stream" [P,L]
+
+RewriteCond %{HTTP:Upgrade} !websocket [NC]
+RewriteRule ^sync\.php$ - [L]
+
+Options -Indexes
