@@ -3,14 +3,17 @@ FROM php:8.3-fpm-alpine
 # نصب وابستگی‌ها
 RUN apk add --no-cache nginx supervisor curl
 
-# کپی فایل‌های تونل
-COPY sync.php /var/www/html/api/sync.php
-COPY .htaccess /var/www/html/api/.htaccess
+# ایجاد پوشه‌ها
+RUN mkdir -p /var/www/html/api
+
+# کپی فایل‌ها (با توجه به ساختار فعلی ریپازیتوری‌ات)
+COPY api/sync.php /var/www/html/api/sync.php
+COPY api/.htaccess /var/www/html/api/.htaccess
 
 # تنظیم Nginx
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Supervisor برای اجرای همزمان Nginx + PHP-FPM
+# Supervisor
 COPY supervisord.conf /etc/supervisord.conf
 
 # مجوزها
