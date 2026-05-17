@@ -1,26 +1,36 @@
 FROM php:8.3-fpm-alpine
 
-# نصب وابستگی‌ها
-RUN apk add --no-cache nginx supervisor curl
+RUN apk add --no-cache nginx curl
 
 # ایجاد پوشه‌ها
-RUN mkdir -p /var/www/html/api
+RUN mkdir -p /var/www/html/api /var/run/php /var/lib/nginx/tmp
 
 # کپی فایل‌ها
 COPY api/sync.php /var/www/html/api/sync.php
 COPY api/.htaccess /var/www/html/api/.htaccess
-COPY nginx.conf /etc/nginx/http.d/default.conf
-COPY supervisord.conf /etc/supervisord.conf
 
-# نصب php socket و تنظیمات
-RUN mkdir -p /var/run/php \
-    && chown -R www-data:www-data /var/www/html /var/run/php \
-    && chmod -R 755 /var/www/html
+# تنظیم nginx خیلی ساده
+RUN echo 'server {
+    listen 80 default_server;
+    root /var/www/html;
+    index index.php;
 
-# مجوزهای nginx
-RUN mkdir -p /var/lib/nginx/tmp/client_body \
-    && chown -R nginx:nginx /var/lib/nginx
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location \~ \.php$ {
+        fastcgi_pass unix:/var/run/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}' > /etc/nginx/http.d/default.conf
+
+# مجوزها
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+# اجرای همزمان nginx و php-fpm
+CMD sh -c "php-fpm8.3 -D && nginx -g 'daemon off;'"
