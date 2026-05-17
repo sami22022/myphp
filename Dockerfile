@@ -5,11 +5,11 @@ RUN apk add --no-cache nginx curl
 # ایجاد پوشه‌ها
 RUN mkdir -p /var/www/html/api /var/run/php /var/lib/nginx/tmp
 
-# کپی فایل‌ها
+# کپی فایل‌های تونل
 COPY api/sync.php /var/www/html/api/sync.php
 COPY api/.htaccess /var/www/html/api/.htaccess
 
-# تنظیم nginx خیلی ساده
+# تنظیم مستقیم nginx (بدون نیاز به فایل جدا)
 RUN echo 'server {
     listen 80 default_server;
     root /var/www/html;
@@ -27,10 +27,10 @@ RUN echo 'server {
     }
 }' > /etc/nginx/http.d/default.conf
 
-# مجوزها
+# تنظیم مجوزها
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-# اجرای همزمان nginx و php-fpm
+# اجرای همزمان php-fpm و nginx
 CMD sh -c "php-fpm8.3 -D && nginx -g 'daemon off;'"
